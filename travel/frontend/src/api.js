@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:8000/api/travel';
+const API_BASE = 'http://localhost:8001/api/travel';
 
 export async function generateItinerary(data) {
     const res = await fetch(`${API_BASE}/generate`, {

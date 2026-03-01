@@ -256,7 +256,7 @@ if st.button("Generate Multi-Destination Itinerary"):
             
         # 5) Suggested Packing List
         st.markdown("## 5️⃣ Suggested Packing List")
-        for cdata in city_data_listasd:
+        for cdata in city_data_list:
             st.subheader(f"Packing List for {cdata['city']}")
             colA, colB = st.columns(2)
             with colA:
