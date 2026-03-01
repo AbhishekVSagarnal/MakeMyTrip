@@ -253,6 +253,29 @@ if st.button("Generate Multi-Destination Itinerary"):
             st.markdown("**Transit Suggestions**")
             transit_text = create_transit_suggestions(cdata['city'])
             st.info(transit_text)
+            
+        # 5) Suggested Packing List
+        st.markdown("## 5️⃣ Suggested Packing List")
+        for cdata in city_data_list:
+            st.subheader(f"Packing List for {cdata['city']}")
+            colA, colB = st.columns(2)
+            with colA:
+                st.markdown("- **Essentials:** Passport & ID, Travel insurance")
+                st.markdown("- **Daily:** Comfortable walking shoes, Day backpack")
+                st.markdown("- **Electronics:** Camera, Universal adapter, Power bank")
+            with colB:
+                # Basic weather-based suggestion
+                avg_high = sum(w.get("high_temp", 20) for w in cdata["weather"]) / max(1, len(cdata["weather"]))
+                if avg_high > 22:
+                    st.markdown("- **Clothing:** Light breathable clothing, Swimwear")
+                    st.markdown("- **Protection:** Sunscreen, Sunglasses, Hat")
+                elif avg_high < 15:
+                    st.markdown("- **Clothing:** Warm jacket, Layers")
+                    st.markdown("- **Protection:** Gloves, Beanie, Scarf")
+                else:
+                    st.markdown("- **Clothing:** Light layers, Light jacket")
+                    st.markdown("- **Protection:** Umbrella (just in case)")
+
 
 st.markdown("---")
 st.markdown("<p style='text-align:center; color: #666;'>© 2025 AI Travel Planner</p>", unsafe_allow_html=True)
