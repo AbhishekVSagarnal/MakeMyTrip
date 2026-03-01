@@ -9,7 +9,7 @@ import WeatherDashboard from './components/WeatherDashboard';
 import CostBreakdown from './components/CostBreakdown';
 import TravelMap from './components/TravelMap';
 import ThemeToggle from './components/ThemeToggle';
-import { generateItinerary, fetchHotels, fetchAttractions, fetchRestaurants, fetchWeather, fetchCost } from './api';
+import { generateItinerary, fetchHotels, fetchAttractions, fetchRestaurants, fetchWeather, fetchCost, fetchTransit, fetchPackingList } from './api';
 
 const today = new Date();
 const defaultDate = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
@@ -63,14 +63,20 @@ export default function App() {
             }
             setStep(2);
 
-            // Step 3: Restaurants + Weather
+            // Step 3: Restaurants + Weather + Transit + Packing
             const allRestaurants = [];
             const allWeather = [];
+            const allTransit = [];
+            const allPacking = [];
             for (const city of dests) {
                 const r = await fetchRestaurants(city, form.cuisine);
                 allRestaurants.push({ city, restaurants: r.restaurants });
                 const w = await fetchWeather(city);
                 allWeather.push({ city, forecast: w.forecast });
+                const t = await fetchTransit(city);
+                allTransit.push({ city, suggestions: t.suggestions });
+                const p = await fetchPackingList(city);
+                allPacking.push({ city, packing_list: p.packing_list });
             }
             setStep(3);
 
@@ -94,6 +100,8 @@ export default function App() {
                 attractions: allAttractions,
                 restaurants: allRestaurants,
                 weather: allWeather,
+                transit: allTransit,
+                packing: allPacking,
                 cost: costData,
             });
             setStep(4);
@@ -104,6 +112,25 @@ export default function App() {
         }
     };
 
+    const handleDownload = () => {
+        if (!results) return;
+        let content = `# AI Travel Itinerary\n\n`;
+        results.destinations.forEach(d => {
+            content += `## ${d.city} (${d.dates})\n\n`;
+            content += `${d.itinerary}\n\n---\n\n`;
+        });
+        content += `\n### Estimated Total Cost: $${results.cost.total}\n`;
+        const blob = new Blob([content], { type: 'text/markdown' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'MyItinerary.md';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
+
     const TABS = [
         { id: 'itinerary', label: '📝 Itinerary' },
         { id: 'hotels', label: '🏨 Hotels' },
@@ -111,6 +138,8 @@ export default function App() {
         { id: 'restaurants', label: '🍽️ Restaurants' },
         { id: 'weather', label: '🌤️ Weather' },
         { id: 'map', label: '🗺️ Map' },
+        { id: 'transit', label: '🚇 Transit' },
+        { id: 'packing', label: '🎒 Packing List' },
         { id: 'cost', label: '💰 Budget' },
     ];
 
@@ -140,13 +169,18 @@ export default function App() {
 
             {results && !loading && (
                 <div className="app-container section animate-fade-in">
-                    <div className="tabs">
-                        {TABS.map(t => (
-                            <button key={t.id} className={`tab-btn ${activeTab === t.id ? 'active' : ''}`}
-                                onClick={() => setActiveTab(t.id)}>
-                                {t.label}
-                            </button>
-                        ))}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '20px' }}>
+                        <div className="tabs" style={{ marginBottom: 0 }}>
+                            {TABS.map(t => (
+                                <button key={t.id} className={`tab-btn ${activeTab === t.id ? 'active' : ''}`}
+                                    onClick={() => setActiveTab(t.id)}>
+                                    {t.label}
+                                </button>
+                            ))}
+                        </div>
+                        <button onClick={handleDownload} className="btn-primary" style={{ padding: '10px 16px', fontSize: '0.9rem' }}>
+                            💾 Download Markdown
+                        </button>
                     </div>
 
                     {activeTab === 'itinerary' && (
@@ -232,6 +266,47 @@ export default function App() {
 
                     {activeTab === 'map' && (
                         <TravelMap destinations={results.destinations} />
+                    )}
+
+                    {activeTab === 'transit' && (
+                        <div className="stagger">
+                            {results.transit.map((cityT, ci) => (
+                                <div key={ci} style={{ marginBottom: 32 }}>
+                                    <h3 style={{ fontFamily: 'var(--font-heading)', marginBottom: 16 }}>
+                                        🚇 Transit in {cityT.city}
+                                    </h3>
+                                    {cityT.suggestions.map((sug, si) => (
+                                        <div key={si} className="glass-card animate-fade-in-up" style={{ marginBottom: 12, animationDelay: `${si * 0.08}s` }}>
+                                            <h4>{sug.type}</h4>
+                                            <p>{sug.description}</p>
+                                            <div style={{ color: 'var(--brand)', fontWeight: 'bold' }}>{sug.cost_estimate}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {activeTab === 'packing' && (
+                        <div className="stagger">
+                            {results.packing.map((cityP, ci) => (
+                                <div key={ci} style={{ marginBottom: 32 }}>
+                                    <h3 style={{ fontFamily: 'var(--font-heading)', marginBottom: 16 }}>
+                                        🎒 Packing List for {cityP.city}
+                                    </h3>
+                                    <div className="glass-card animate-fade-in-up" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+                                        {Object.entries(cityP.packing_list).map(([cat, items], idx) => (
+                                            <div key={idx}>
+                                                <h4 style={{ color: 'var(--primary)', marginBottom: '8px' }}>{cat}</h4>
+                                                <ul style={{ paddingLeft: '20px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                                                    {items.map((item, i) => <li key={i}>{item}</li>)}
+                                                </ul>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     )}
 
                     {activeTab === 'cost' && (

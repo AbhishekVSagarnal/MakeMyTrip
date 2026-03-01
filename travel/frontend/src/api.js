@@ -53,3 +53,21 @@ export async function fetchCost(budget, days, travelers) {
     });
     return res.json();
 }
+
+export async function fetchTransit(destination) {
+    const res = await fetch(`${API_BASE}/transit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ destination }),
+    });
+    return res.json();
+}
+
+export async function fetchPackingList(destination) {
+    const res = await fetch(`${API_BASE}/packing`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ destination }),
+    });
+    return res.json();
+}

@@ -38,3 +38,7 @@ class CostQuery(BaseModel):
     budget: str = "Mid-range"
     days: int = 3
     travelers: int = 1
+
+
+class CityQuery(BaseModel):
+    destination: str

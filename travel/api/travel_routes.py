@@ -8,7 +8,7 @@ from fastapi import APIRouter
 from google import genai
 from google.genai import types
 from dotenv import load_dotenv
-from .models import TripRequest, HotelQuery, AttractionQuery, RestaurantQuery, WeatherQuery, CostQuery
+from .models import TripRequest, HotelQuery, AttractionQuery, RestaurantQuery, WeatherQuery, CostQuery, CityQuery
 
 load_dotenv()
 router = APIRouter(prefix="/api/travel", tags=["travel"])
@@ -295,3 +295,30 @@ async def estimate_cost(q: CostQuery):
     breakdown["total"] = sum(breakdown.values())
     breakdown["daily_per_person"] = sum(selected.values())
     return {"cost": breakdown, "budget": q.budget, "days": q.days, "travelers": q.travelers}
+
+
+@router.post("/transit")
+async def get_transit(q: CityQuery):
+    # Simulated transit suggestions
+    transit_options = [
+        {"type": "Metro/Subway", "description": f"The local metro in {q.destination} is the fastest way to get around the city center.", "cost_estimate": "$2-4 per ride"},
+        {"type": "Bus", "description": "Extensive bus networks cover areas the metro doesn't reach. Great for sightseeing.", "cost_estimate": "$1.50-3 per ride"},
+        {"type": "Taxi/Rideshare", "description": "Available everywhere. Useful for late-night travel or airport transfers.", "cost_estimate": "Moderate to High"},
+    ]
+    return {"suggestions": transit_options}
+
+
+@router.post("/packing")
+async def get_packing(q: CityQuery):
+    # Basic simulated packing list
+    essentials = ["Passport & ID", "Travel insurance documents", "Universal power adapter", "Comfortable walking shoes"]
+    clothing = ["Layered clothing", "Light jacket", "Evening wear for dinners", "Swimwear (if applicable)"]
+    toiletries = ["Toothbrush & paste", "Sunscreen (SPF 30+)", "Basic first-aid kit", "Deodorant & Skincare"]
+    
+    return {
+        "packing_list": {
+            "Essentials": essentials,
+            "Clothing": clothing,
+            "Toiletries": toiletries
+        }
+    }
