@@ -96,6 +96,7 @@ def display_roadmap(itinerary, destination):
 
 # Get user inputs
 inputs = get_user_inputs()
+print("DEBUG: User inputs received ->", inputs)
 
 if inputs:
     (source, destination, start_date, num_days, interests, budget_level, cuisine,
