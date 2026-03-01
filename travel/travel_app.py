@@ -154,7 +154,7 @@ if st.button("Generate Multi-Destination Itinerary"):
         city_data_list = []
 
         # Combine date & time for departure
-        trip_start_dt = datetime.datetime.combine(start_date, start_time)
+        trip_start_dt = dt.datetime.combine(start_date, start_time)
 
         for idx, city in enumerate(destinations):
             st.info(f"Fetching data for **{city}**...")
@@ -165,8 +165,8 @@ if st.button("Generate Multi-Destination Itinerary"):
                 restaurants = fetch_restaurants(city, cuisine)
 
                 # Calculate travel dates for each city (basic additive approach)
-                city_start_dt = trip_start_dt + datetime.timedelta(days=days_per_city * idx)
-                city_end_dt   = city_start_dt + datetime.timedelta(days=days_per_city)
+                city_start_dt = trip_start_dt + dt.timedelta(days=days_per_city * idx)
+                city_end_dt   = city_start_dt + dt.timedelta(days=days_per_city)
                 date_range_str = f"{city_start_dt.strftime('%Y-%m-%d')} to {city_end_dt.strftime('%Y-%m-%d')}"
 
                 # 5) Real-time Weather (simulated)
