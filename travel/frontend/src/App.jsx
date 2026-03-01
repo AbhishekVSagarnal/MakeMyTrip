@@ -8,6 +8,7 @@ import HotelCard from './components/HotelCard';
 import WeatherDashboard from './components/WeatherDashboard';
 import CostBreakdown from './components/CostBreakdown';
 import TravelMap from './components/TravelMap';
+import ThemeToggle from './components/ThemeToggle';
 import { generateItinerary, fetchHotels, fetchAttractions, fetchRestaurants, fetchWeather, fetchCost } from './api';
 
 const today = new Date();
@@ -23,6 +24,14 @@ export default function App() {
         interests: ['culture', 'history'],
         cuisine: 'Local',
     });
+
+    const [theme, setTheme] = React.useState('dark');
+
+    React.useEffect(() => {
+        document.documentElement.setAttribute('data-theme', theme);
+    }, [theme]);
+
+    const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
 
     const [loading, setLoading] = useState(false);
     const [step, setStep] = useState(-1);
@@ -107,6 +116,7 @@ export default function App() {
 
     return (
         <div>
+            <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
             <HeroSection />
             <TripForm form={form} setForm={setForm} onSubmit={handleGenerate} loading={loading} />
 

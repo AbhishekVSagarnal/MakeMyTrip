@@ -13,7 +13,8 @@ export default function ItineraryTimeline({ destinations }) {
                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: 20 }}>
                         {dest.dates}
                     </p>
-                    <div className="glass-card itinerary-content" style={{ padding: 28 }}>
+                    <div className="glass-card enhanced-timeline-content" style={{ padding: 40, position: 'relative', overflow: 'hidden' }}>
+                        <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: 'var(--gradient-main)' }} />
                         <Markdown>{dest.itinerary}</Markdown>
                     </div>
                 </div>
